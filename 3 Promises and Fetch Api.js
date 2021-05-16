@@ -22,7 +22,12 @@ const renderCountry = function (data, className = '') {
         </article>
   `;
   countriesContainer.insertAdjacentHTML('beforeend', html);
-  countriesContainer.style.opacity = 1;
+  //   countriesContainer.style.opacity = 1;
+};
+
+const renderError = function (msg) {
+  countriesContainer.insertAdjacentText('beforeend', msg);
+  //   countriesContainer.style.opacity = 1;
 };
 /* 
 * Promise: A promise is an object that may produce a single value
@@ -56,13 +61,15 @@ const getCountryData = function (country) {
   //   Country 1
   fetch(`https://restcountries.eu/rest/v2/name/${country}`)
     //   handling the promise using then method
-    .then(function (response) {
-      //  to read the data from the response we need to call the json method on that response object
-      // this json function is also an asynchronous function. It will also return a new promise
-      return response.json();
-    })
+    .then(response => response.json())
+    //  to read the data from the response we need to call the json method on that response object
+    // this json function is also an asynchronous function. It will also return a new promise
+
     // since above is a promise we can again call the then method
-    .then(function (data) {
+    // .then(function (data) {
+    //   renderCountry(data[0]);
+    //   const neighbour = data[0].borders[0];
+    .then(data => {
       renderCountry(data[0]);
       const neighbour = data[0].borders[0];
 
@@ -72,7 +79,19 @@ const getCountryData = function (country) {
       return fetch(`https://restcountries.eu/rest/v2/alpha/${neighbour}`);
     })
     .then(response => response.json())
-    .then(data => renderCountry(data, 'neighbour'));
+    .then(data => renderCountry(data, 'neighbour'))
+    // catch also returns a promise
+    .catch(err => {
+      console.error(`${err} 🔥🔥🔥`);
+      renderError(`Something went wrong 🔥🔥🔥 ${err.message}. Try again!`);
+    })
+    .finally(() => {
+      countriesContainer.style.opacity = 1;
+    });
 };
-getCountryData('nepal');
-// getCountryData('germany');
+
+btn.addEventListener('click', function () {
+  getCountryData('nepal');
+});
+
+getCountryData('weird');
