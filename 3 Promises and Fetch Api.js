@@ -52,33 +52,34 @@ The Fetch API is a promise-based JavaScript API for making asynchronous HTTP req
 const request = fetch('https://restcountries.eu/rest/v2/name/nepal');
 // console.log(request);
 
+const getJSON = function (url, errorMessage = 'Something went wrong') {
+  return fetch(url).then(response => {
+    if (!response.ok) throw new Error(`${errorMessage} (${response.status})`);
+
+    return response.json();
+  });
+};
+
 // Consuming promise
 const getCountryData = function (country) {
-  // calling a fetch function like this will immediately return the promise
-  //   In the beginning the promise is still pending because the
-  //asynchronous task of getting the data is still running in the background
-  //   The fetch here will return the promise and on all the promises we can apply the then method
   //   Country 1
-  fetch(`https://restcountries.eu/rest/v2/name/${country}`)
-    //   handling the promise using then method
-    .then(response => response.json())
-    //  to read the data from the response we need to call the json method on that response object
-    // this json function is also an asynchronous function. It will also return a new promise
-
-    // since above is a promise we can again call the then method
-    // .then(function (data) {
-    //   renderCountry(data[0]);
-    //   const neighbour = data[0].borders[0];
+  getJSON(
+    `https://restcountries.eu/rest/v2/name/${country}`,
+    'Country not found'
+  )
     .then(data => {
       renderCountry(data[0]);
       const neighbour = data[0].borders[0];
 
-      if (!neighbour) return;
+      if (!neighbour) throw new Error('No Neighbour Found');
 
       //   Country 2
-      return fetch(`https://restcountries.eu/rest/v2/alpha/${neighbour}`);
+      return geJSON(
+        `https://restcountries.eu/rest/v2/alpha/${neighbour}`,
+        'Country not found'
+      );
     })
-    .then(response => response.json())
+
     .then(data => renderCountry(data, 'neighbour'))
     // catch also returns a promise
     .catch(err => {
@@ -94,4 +95,59 @@ btn.addEventListener('click', function () {
   getCountryData('nepal');
 });
 
-getCountryData('weird');
+getCountryData('australia');
+
+// Above code to study again
+
+// Consuming promise
+// const getCountryData = function (country) {
+// calling a fetch function like this will immediately return the promise
+//   In the beginning the promise is still pending because the
+//asynchronous task of getting the data is still running in the background
+//   The fetch here will return the promise and on all the promises we can apply the then method
+
+//   Country 1
+//   fetch(`https://restcountries.eu/rest/v2/name/${country}`)
+//   handling the promise using then method
+//     .then(response => {
+//       console.log(response);
+
+//       if (!response.ok)
+//         throw new Error(`Country not found (${response.status})`);
+//       return response.json();
+//     })
+// the promise returned by above then handler is rejected promise
+
+//  to read the data from the response we need to call the json method on that response object
+// this json function is also an asynchronous function. It will also return a new promise
+
+// since above is a promise we can again call the then method
+// .then(function (data) {
+//   renderCountry(data[0]);
+//   const neighbour = data[0].borders[0];
+//     .then(data => {
+//       renderCountry(data[0]);
+// const neighbour = data[0].borders[0];
+//       const neighbour = 'weird';
+
+//       if (!neighbour) return;
+
+//   Country 2
+//       return fetch(`https://restcountries.eu/rest/v2/alpha/${neighbour}`);
+//     })
+//     .then(response => {
+//       if (!response.ok)
+//         throw new Error(`Country not found (${response.status})`);
+
+//       return response.json();
+//     })
+//     .then(data => renderCountry(data, 'neighbour'))
+// catch also returns a promise
+//     .catch(err => {
+//       console.error(`${err} 🔥🔥🔥`);
+//       renderError(`Something went wrong 🔥🔥🔥 ${err.message}. Try again!`);
+//     })
+//     .finally(() => {
+//       countriesContainer.style.opacity = 1;
+//     });
+// };
